@@ -1,0 +1,1 @@
+module.exports.roleServices = require("./role.service");

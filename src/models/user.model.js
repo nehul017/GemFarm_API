@@ -1,0 +1,45 @@
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define(
+    "user",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false,
+      },
+      userName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "roles", // Refers to the table name in the DB
+          key: "id",
+        },
+      },
+    },
+    { timestamps: true }
+  );
+
+  // Association: User belongs to Role
+  User.associate = (models) => {
+    User.belongsTo(models.role, {
+      // Singular to match Role model
+      foreignKey: "roleId",
+      as: "role", // Alias used in queries
+    });
+  };
+
+  return User;
+};
