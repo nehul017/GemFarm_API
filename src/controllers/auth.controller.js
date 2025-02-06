@@ -1,4 +1,9 @@
+const logger = require("../config/logger");
+const apiResponse = require("../middlewares/api.response");
 const userService = require("../services/user.service");
+const message = require("../contants/message.json");
+const { otpServices } = require("../services");
+const bcrypt = require("bcryptjs");
 
 // Controller function for registering a user
 const registerUser = async (req, res) => {
@@ -32,7 +37,7 @@ const loginUser = async (req, res) => {
       token,
     });
   } catch (err) {
-    console.log('err', err)
+    console.log("err", err);
     return res.status(400).send({ message: err.message });
   }
 };
@@ -67,10 +72,91 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  try {
+    const reqBody = req.body;
+
+    const emailExist = await userService.getUserByEmail(reqBody.email);
+
+    if (!emailExist) {
+      return apiResponse.NOT_FOUND({
+        res,
+        message: message.email_not_register,
+      }); // If email doesn't exist, throw an error.
+    }
+
+    await userService.sendForgetPasswordEmail(emailExist.email);
+
+    return apiResponse.OK({
+      res,
+      message: message.password_forgot,
+    });
+  } catch (err) {
+    logger.error("error generating", err);
+    return apiResponse.CATCH_ERROR({
+      res,
+      message: message.something_went_wrong,
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const reqBody = req.body;
+
+    const otpExists = await otpServices.getOtpWhere({
+      where: {
+        otp: reqBody.otp,
+      },
+    });
+
+    if (!otpExists) {
+      return apiResponse.NOT_FOUND({ res, message: message.otp_invalid });
+    }
+
+    if (otpExists.otp !== reqBody.otp) {
+      return apiResponse.BAD_REQUEST({ res, message: message.otp_invalid });
+    }
+
+    if (new Date(otpExists.expires) <= new Date()) {
+      return apiResponse.BAD_REQUEST({ res, message: message.otp_expired });
+    }
+
+    const userExist = await userService.getUserById(otpExists.userId);
+
+    if (!userExist) {
+      return apiResponse.NOT_FOUND({
+        res,
+        message: message.email_not_register,
+      });
+    }
+
+    let password = await bcrypt.hashSync(reqBody.password, 10);
+
+    await userService.updateUser(userExist.id, {
+      password: password,
+    });
+    await otpServices.deleteOtp(otpExists.id);
+
+    return apiResponse.OK({
+      res,
+      message: message.password_reset,
+    });
+  } catch (err) {
+    logger.error("error generating", err);
+    return apiResponse.CATCH_ERROR({
+      res,
+      message: message.something_went_wrong,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   updateUser,
   deleteUser,
   getAllUsers,
+  forgotPassword,
+  resetPassword,
 };

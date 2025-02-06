@@ -2,12 +2,13 @@ const { sequelize, Sequelize, DataTypes } = require("../config/database");
 
 const User = require("../models/user.model")(sequelize, DataTypes);
 const Role = require("../models/role.model")(sequelize, DataTypes);
-
+const OTP = require("../models/otp.model")(sequelize, DataTypes);
 const db = {
   sequelize,
   Sequelize,
   user: User,
   role: Role,
+  otp: OTP,
 };
 
 // Setup associations

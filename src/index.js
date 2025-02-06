@@ -7,6 +7,7 @@ const cors = require("cors");
 const { default: helmet } = require("helmet");
 const morgan = require("./config/morgan");  
 const apiResponse = require("./middlewares/api.response");
+const { transport } = require("./utils/email-sending");
 require("./models/index");
 
 const app = express();
@@ -28,5 +29,13 @@ app.use((req, res, next) => {
 
 app.listen(process.env.PORT, () => {
     logger.info(`Listening to port ${process.env.PORT}`);
+    transport
+      .verify()
+      .then(() => logger.info("📧 Connected to email server 📧"))
+      .catch(() =>
+        logger.warn(
+          "Unable to connect to email server. Make sure you have configured the SMTP options in .env"
+        )
+      );
 });
 

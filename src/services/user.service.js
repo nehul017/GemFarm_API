@@ -1,7 +1,9 @@
-const { user: USER, role, sequelize } = require("../models");
+const { user: USER, role, sequelize, otp: otpModel } = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { where } = require("sequelize");
+const { sendOTP } = require("../templates/emailTemplate");
+const { sendEmail } = require("../utils/email-sending");
+const moment = require("moment/moment");
 
 // Service function for creating a user
 const createUser = async (userData) => {
@@ -10,7 +12,7 @@ const createUser = async (userData) => {
       where: { email: userData.email },
     });
 
-    if (existingUser) { 
+    if (existingUser) {
       return new Error("User with this email already exists");
     }
 
@@ -97,10 +99,51 @@ const loginUser = async (email, password) => {
   }
 };
 
+const sendForgetPasswordEmail = async (email) => {
+  try {
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return new Error("User not found");
+    }
+
+    const generateOtp = () =>
+      ("0".repeat(4) + Math.floor(Math.random() * 10 ** 4)).slice(-4);
+
+    let otp = await generateOtp();
+
+    const expireTime = moment().add(10, "minute").toISOString();
+
+    await otpModel.create({
+      otp,
+      userId: user.id,
+      expires: expireTime,
+    });
+
+    await sendEmail(email, "Forget Password", sendOTP(email, otp));
+
+    return token;
+  } catch (error) {
+    return new Error("Error sending email");
+  }
+};
+const getUserById = async (id) => {
+  try {
+    const user = await USER.findByPk(id);
+    if (!user) {
+      return new Error("User not found");
+    }
+    return user;
+  } catch (error) {
+    throw new Error("Error fetching user by ID");
+  }
+};
+
 module.exports = {
   createUser,
   getUserByEmail,
   updateUser,
   deleteUser,
   loginUser,
+  sendForgetPasswordEmail,
+  getUserById,
 };
