@@ -8,6 +8,7 @@ const {
   registerUser,
   forgotPassword,
   resetPassword,
+  getLoginUser,
 } = require("../controllers/auth.controller");
 const validate = require("../middlewares/validate");
 const {
@@ -16,6 +17,7 @@ const {
   forgot,
   reset,
 } = require("../validations/auth.validation");
+const auth = require("../middlewares/auth");
 
 // Register route
 router.post("/register", validate(register), registerUser);
@@ -34,5 +36,6 @@ router.put("/reset-password", validate(reset), resetPassword);
 router.put("/:id", updateUser);
 router.delete("/:id", deleteUser);
 router.get("/", getAllUsers);
+router.get("/get-profile", auth, getLoginUser);
 
 module.exports = router;

@@ -72,6 +72,21 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// Controller function for get login user
+const getLoginUser = async (req, res) => {
+  try {
+    const user = await userService.getUserById(req.user.id);
+    return res.status(200).send({
+      message: "User Retrieve successfully",
+      user: user,
+    });
+  } catch (err) {
+    return res.status(500).send({ message: err.message });
+  }
+};
+
+
+//Controller function for forgot password
 const forgotPassword = async (req, res) => {
   try {
     const reqBody = req.body;
@@ -159,4 +174,5 @@ module.exports = {
   getAllUsers,
   forgotPassword,
   resetPassword,
+  getLoginUser
 };
