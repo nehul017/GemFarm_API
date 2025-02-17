@@ -8,10 +8,11 @@ const bcrypt = require("bcryptjs");
 // Controller function for registering a user
 const registerUser = async (req, res) => {
   try {
-    const user = await userService.createUser(req.body);
+    const { user, token } = await userService.createUser(req.body);
     return res.status(201).send({
       message: "User registered successfully",
       user: user,
+      token: token
     });
   } catch (err) {
     return res

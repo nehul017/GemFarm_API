@@ -375,7 +375,7 @@ const employeeRegister = (firstName, lastName, to, password) => {
                                                         <p style="margin: 0 0 16px;">
                                                             Not sure why you received this email? ignore this
                                                         </p>
-                                                        <p style="margin: 0 0 16px;">Thanks, <br>The Node
+                                                        <p style="margin: 0 0 16px;">Thanks, <br>GemFarm
                                                             Team</p>
                                                     </td>
                                                 </tr>

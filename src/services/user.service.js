@@ -16,12 +16,22 @@ const createUser = async (userData) => {
       return new Error("User with this email already exists");
     }
 
+    userData.roleId = 5;
+    console.log('userData', userData)
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const newUser = await USER.create({
       ...userData,
       password: hashedPassword,
     });
-    return newUser;
+
+    const token = jwt.sign(
+      { id: newUser.id, role: newUser.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+    return { user: newUser, token };
   } catch (error) {
     throw new Error("Error creating user");
   }
@@ -134,6 +144,7 @@ const getUserById = async (id) => {
     }
     return user;
   } catch (error) {
+    console.log('error', error)
     throw new Error("Error fetching user by ID");
   }
 };

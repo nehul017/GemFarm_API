@@ -20,7 +20,7 @@ const {
 const auth = require("../middlewares/auth");
 
 // Register route
-router.post("/register", validate(register), registerUser);
+router.post("/signup", validate(register), registerUser);
 
 // Login route
 router.post("/login", validate(login), loginUser);

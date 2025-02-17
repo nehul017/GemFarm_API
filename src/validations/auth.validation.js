@@ -29,7 +29,7 @@ const login = {
  */
 const register = {
   body: Joi.object().keys({
-    username: Joi.string().trim().required(),
+    userName: Joi.string().trim().required(),
     email: Joi.string()
       .trim()
       .email()
