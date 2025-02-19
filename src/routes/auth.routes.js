@@ -9,6 +9,7 @@ const {
   forgotPassword,
   resetPassword,
   getLoginUser,
+  verifyOTP,
 } = require("../controllers/auth.controller");
 const validate = require("../middlewares/validate");
 const {
@@ -16,6 +17,7 @@ const {
   login,
   forgot,
   reset,
+  verifyOtp,
 } = require("../validations/auth.validation");
 const auth = require("../middlewares/auth");
 
@@ -30,6 +32,9 @@ router.post("/login", validate(login), loginUser);
  */
 router.post("/forgot-password", validate(forgot), forgotPassword);
 router.put("/reset-password", validate(reset), resetPassword);
+
+// Verify OTP
+router.post("/verify-otp", validate(verifyOtp), verifyOTP);
 
 
 // Other routes...

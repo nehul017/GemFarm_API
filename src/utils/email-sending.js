@@ -13,8 +13,6 @@ const transport = nodemailer.createTransport({
 
 
 const sendEmail = async (to, subject, data) => {
-  console.log('subject', subject)
-  console.log('to', to)
   try {
     return await transport
       .sendMail({

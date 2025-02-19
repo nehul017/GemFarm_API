@@ -22,5 +22,6 @@
   "old_password_wrong": "old password is wrong",
   "unauthorized": "Unauthorized access.",
   "invalid_token": "Invalid token provided.",
-  "token_expired": "Your session has expired. Please log in again."
+  "token_expired": "Your session has expired. Please log in again.",
+  "password_not_match": "Password and confirm password not match."
 }

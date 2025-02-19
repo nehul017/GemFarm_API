@@ -117,7 +117,7 @@ const sendForgetPasswordEmail = async (email) => {
     }
 
     const generateOtp = () =>
-      ("0".repeat(4) + Math.floor(Math.random() * 10 ** 4)).slice(-4);
+      ("0".repeat(6) + Math.floor(Math.random() * 10 ** 6)).slice(-6);
 
     let otp = await generateOtp();
 

@@ -116,7 +116,7 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-const resetPassword = async (req, res) => {
+const verifyOTP = async (req, res) => {
   try {
     const reqBody = req.body;
 
@@ -138,7 +138,28 @@ const resetPassword = async (req, res) => {
       return apiResponse.BAD_REQUEST({ res, message: message.otp_expired });
     }
 
-    const userExist = await userService.getUserById(otpExists.userId);
+    await otpServices.deleteOtp(otpExists.id);
+
+    return apiResponse.OK({
+      res,
+      message: message.otp_verify_success,
+    });
+  } catch (err) {
+    logger.error("error generating", err);
+    return apiResponse.CATCH_ERROR({
+      res,
+      message: message.something_went_wrong,
+    });
+  }
+}
+
+
+const resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword, email } = req.body;
+
+
+    const userExist = await userService.getUserByEmail(email);
 
     if (!userExist) {
       return apiResponse.NOT_FOUND({
@@ -147,12 +168,18 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    let password = await bcrypt.hashSync(reqBody.password, 10);
+    if (password !== confirmPassword) {
+      return apiResponse.BAD_REQUEST({
+        res,
+        message: message.password_not_match,
+      });
+    }
+
+      let hashPassword = await bcrypt.hashSync(password, 10);
 
     await userService.updateUser(userExist.id, {
-      password: password,
+      password: hashPassword
     });
-    await otpServices.deleteOtp(otpExists.id);
 
     return apiResponse.OK({
       res,
@@ -175,5 +202,6 @@ module.exports = {
   getAllUsers,
   forgotPassword,
   resetPassword,
+  verifyOTP,
   getLoginUser
 };
