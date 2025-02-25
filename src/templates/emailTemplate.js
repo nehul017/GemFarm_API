@@ -152,7 +152,7 @@ const sendOTP = (to, otp) => {
                                                     <td
                                                         style="font-family: 'Montserrat',Arial,sans-serif; padding-top: 32px; padding-bottom: 32px;">
                                                         <span style="font-weight: 600; color: #626262;">Note:</span>
-                                                        This OTP is valid for 10 minutes from the time it was sent to
+                                                        This OTP is valid for 5 minutes from the time it was sent to
                                                         you and
                                                         can be used to change your password only once
                                                         <div

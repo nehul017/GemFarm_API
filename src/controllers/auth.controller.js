@@ -8,13 +8,19 @@ const bcrypt = require("bcryptjs");
 // Controller function for registering a user
 const registerUser = async (req, res) => {
   try {
-    const { user, token } = await userService.createUser(req.body);
-    return res.status(201).send({
-      message: "User registered successfully",
-      user: user,
-      token: token
-    });
+    const createdData = await userService.createUser(req.body);
+
+    if (!createdData) {
+      return res.status(400).send({ message: "Email already exists" });
+    } else {
+      return res.status(201).send({
+        message: "User registered successfully",
+        user: createdData.user,
+        token: createdData.token
+      });
+    }
   } catch (err) {
+    console.log('err', err)
     return res
       .status(500)
       .send({ message: "Error registering user", error: err.message });
@@ -175,7 +181,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-      let hashPassword = await bcrypt.hashSync(password, 10);
+    let hashPassword = await bcrypt.hashSync(password, 10);
 
     await userService.updateUser(userExist.id, {
       password: hashPassword

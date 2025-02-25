@@ -6,18 +6,18 @@ const { sendEmail } = require("../utils/email-sending");
 const moment = require("moment/moment");
 
 // Service function for creating a user
-const createUser = async (userData) => {
+const createUser = async (userData, res) => {
   try {
     const existingUser = await USER.findOne({
       where: { email: userData.email },
     });
 
     if (existingUser) {
-      return new Error("User with this email already exists");
+      return null;
     }
 
     userData.roleId = 5;
-    console.log('userData', userData)
+
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const newUser = await USER.create({
       ...userData,
@@ -121,7 +121,7 @@ const sendForgetPasswordEmail = async (email) => {
 
     let otp = await generateOtp();
 
-    const expireTime = moment().add(10, "minute").toISOString();
+    const expireTime = moment().add(5, "minute").toISOString();
 
     await otpModel.create({
       otp,
