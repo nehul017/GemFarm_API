@@ -5,10 +5,10 @@ const logger = require("./logger");
 // Creating Sequelize instance
 const sequelize = new Sequelize({
   dialect: "mysql",
-  host: "localhost" || process.env.HOST,
-  database: "genfarm" || process.env.DATABASE,
-  username: "root" || process.env.USERNAME,
-  password: "Nehul@2607" || process.env.PASSWORD,
+  host: process.env.HOST || "localhost",
+  database: process.env.DATABASE || "genfarm",
+  username: process.env.DB_USERNAME || "root",
+  password: process.env.PASSWORD  || "Nehul@2607",
   port: 3306,
   logging: false,
 });

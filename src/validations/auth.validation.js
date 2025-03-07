@@ -164,6 +164,20 @@ const verfiyOTP = {
   }),
 };
 
+const updateProfile = {
+  body: Joi.object().keys({
+    userName: Joi.string().trim().required(),
+    email: Joi.string()
+      .trim()
+      .email()
+      .pattern(new RegExp('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'))
+      .required()
+      .messages({
+        'string.pattern.base': 'Email must be a valid email address.',
+      }),
+  }),
+};
+
 /**
  * All auth validations are exported from here 👇
  */
@@ -176,5 +190,6 @@ module.exports = {
   logout,
   register,
   reset,
-  verfiyOTP
+  verfiyOTP,
+  updateProfile
 };
