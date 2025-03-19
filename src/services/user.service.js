@@ -33,6 +33,7 @@ const createUser = async (userData, res) => {
     );
     return { user: newUser, token };
   } catch (error) {
+    console.log('error', error)
     throw new Error("Error creating user");
   }
 };
@@ -45,6 +46,7 @@ const getUserByEmail = async (email) => {
         "id",
         "userName",
         "password",
+        "profileImage",
         "email",
         "roleId",
         "createdAt",
@@ -71,6 +73,7 @@ const updateUser = async (id, updateData) => {
     await user.update(updateData);
     return user;
   } catch (error) {
+    console.log('error', error)
     throw new Error("Error updating user");
   }
 };
@@ -100,7 +103,7 @@ const loginUser = async (email, password) => {
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "24h",
       }
     );
     return { user, token };

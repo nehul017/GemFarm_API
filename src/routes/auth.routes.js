@@ -21,6 +21,7 @@ const {
   updateProfile,
 } = require("../validations/auth.validation");
 const auth = require("../middlewares/auth");
+const { upload } = require("../services/s3.upload");
 
 // Register route
 router.post("/signup", validate(register), registerUser);
@@ -39,7 +40,7 @@ router.post("/verify-otp", validate(verifyOtp), verifyOTP);
 
 
 // Other routes...
-router.put("/update-profile/:id", auth, validate(updateProfile), updateUser);
+router.put("/update-profile/:id", auth, upload, validate(updateProfile), updateUser);
 router.delete("/:id", deleteUser);
 router.get("/", getAllUsers);
 router.get("/get-profile", auth, getLoginUser);

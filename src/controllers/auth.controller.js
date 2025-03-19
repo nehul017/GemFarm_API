@@ -52,6 +52,12 @@ const loginUser = async (req, res) => {
 // Controller function for updating a user
 const updateUser = async (req, res) => {
   try {
+    // Get uploaded image URL (if file exists)
+    const profileImage = req.file ? req.file.location : undefined;
+    console.log('req.file', req.file)
+
+
+    if (profileImage) req.body.profileImage = profileImage;
     const user = await userService.updateUser(req.params.id, req.body);
     return res.status(200).send({ message: "User updated successfully", user });
   } catch (err) {
