@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
       const foundUser = await user.findOne({
         attributes: [
           "id",
-          "userName",
+          "username",
           "email",
           "roleId",
           "createdAt",

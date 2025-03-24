@@ -24,7 +24,7 @@ module.exports = adminSeeder = async () => {
       const password = await bcrypt.hash("Admin@123",10)
         if(!adminExist) {
           await db.users.create({
-            userName: "Admin",
+            username: "Admin",
             email: "genfarmadmin@gmail.com",
             password: password,
             roleId: superAdminRole.id,

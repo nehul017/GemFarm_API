@@ -29,7 +29,7 @@ const login = {
  */
 const register = {
   body: Joi.object().keys({
-    userName: Joi.string().trim().required(),
+    username: Joi.string().trim().required(),
     email: Joi.string()
       .trim()
       .email()
@@ -166,7 +166,7 @@ const verfiyOTP = {
 
 const updateProfile = {
   body: Joi.object().keys({
-    userName: Joi.string().trim().required(),
+    username: Joi.string().trim().required(),
     email: Joi.string()
       .trim()
       .email()

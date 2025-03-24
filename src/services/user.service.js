@@ -44,7 +44,7 @@ const getUserByEmail = async (email) => {
     const user = await USER.findOne({
       attributes: [
         "id",
-        "userName",
+        "username",
         "password",
         "profileImage",
         "email",
