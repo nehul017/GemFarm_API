@@ -131,7 +131,7 @@ const sendOTP = (to, otp) => {
                                             <p style="margin: 24px 0; color: #626262;">
 
                                                 A request to reset password was received form your <span
-                                                    style="font-weight: 600; color: #626262;">GemFarm</span>
+                                                    style="font-weight: 600; color: #626262;">GemFarm Team</span>
                                                 Account ${to}
                                             <p style=“margin-bottom : 10px”>
                                                 Use this OTP to reset your password and login
@@ -152,7 +152,7 @@ const sendOTP = (to, otp) => {
                                                     <td
                                                         style="font-family: 'Montserrat',Arial,sans-serif; padding-top: 32px; padding-bottom: 32px;">
                                                         <span style="font-weight: 600; color: #626262;">Note:</span>
-                                                        This OTP is valid for 10 minutes from the time it was sent to
+                                                        This OTP is valid for 5 minutes from the time it was sent to
                                                         you and
                                                         can be used to change your password only once
                                                         <div
@@ -161,7 +161,7 @@ const sendOTP = (to, otp) => {
                                                         <p style="margin: 0 0 16px;">
                                                             Not sure why you received this email? ignore this
                                                         </p>
-                                                        <p style="margin: 0 0 16px;">Thanks, <br>The Node Team</p>
+                                                        <p style="margin: 0 0 16px;">Thanks, <br>GemFarm Team</p>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -375,8 +375,7 @@ const employeeRegister = (firstName, lastName, to, password) => {
                                                         <p style="margin: 0 0 16px;">
                                                             Not sure why you received this email? ignore this
                                                         </p>
-                                                        <p style="margin: 0 0 16px;">Thanks, <br>The Node
-                                                            Team</p>
+                                                        <p style="margin: 0 0 16px;">Thanks, <br>GemFarm Team</p>
                                                     </td>
                                                 </tr>
                                             </table>

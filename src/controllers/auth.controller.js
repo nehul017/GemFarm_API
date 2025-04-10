@@ -4,16 +4,26 @@ const userService = require("../services/user.service");
 const message = require("../contants/message.json");
 const { otpServices } = require("../services");
 const bcrypt = require("bcryptjs");
+const axios = require("axios");
+const moment = require("moment/moment");
+const { commodity } = require("../models");
 
 // Controller function for registering a user
 const registerUser = async (req, res) => {
   try {
-    const user = await userService.createUser(req.body);
-    return res.status(201).send({
-      message: "User registered successfully",
-      user: user,
-    });
+    const createdData = await userService.createUser(req.body);
+
+    if (!createdData) {
+      return res.status(400).send({ message: "Email already exists" });
+    } else {
+      return res.status(201).send({
+        message: "User registered successfully",
+        user: createdData.user,
+        token: createdData.token,
+      });
+    }
   } catch (err) {
+    console.log("err", err);
     return res
       .status(500)
       .send({ message: "Error registering user", error: err.message });
@@ -27,6 +37,7 @@ const loginUser = async (req, res) => {
       req.body.email,
       req.body.password
     );
+    console.log('user', user)
     if (!user) {
       return res.status(400).send({ message: "Invalid email or password" });
     }
@@ -45,6 +56,11 @@ const loginUser = async (req, res) => {
 // Controller function for updating a user
 const updateUser = async (req, res) => {
   try {
+    // Get uploaded image URL (if file exists)
+    const profileImage = req.file ? req.file.location : undefined;
+
+    delete req.body.email;
+    if (profileImage) req.body.profileImage = profileImage;
     const user = await userService.updateUser(req.params.id, req.body);
     return res.status(200).send({ message: "User updated successfully", user });
   } catch (err) {
@@ -85,7 +101,6 @@ const getLoginUser = async (req, res) => {
   }
 };
 
-
 //Controller function for forgot password
 const forgotPassword = async (req, res) => {
   try {
@@ -115,7 +130,7 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-const resetPassword = async (req, res) => {
+const verifyOTP = async (req, res) => {
   try {
     const reqBody = req.body;
 
@@ -137,7 +152,26 @@ const resetPassword = async (req, res) => {
       return apiResponse.BAD_REQUEST({ res, message: message.otp_expired });
     }
 
-    const userExist = await userService.getUserById(otpExists.userId);
+    await otpServices.deleteOtp(otpExists.id);
+
+    return apiResponse.OK({
+      res,
+      message: message.otp_verify_success,
+    });
+  } catch (err) {
+    logger.error("error generating", err);
+    return apiResponse.CATCH_ERROR({
+      res,
+      message: message.something_went_wrong,
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword, email } = req.body;
+
+    const userExist = await userService.getUserByEmail(email);
 
     if (!userExist) {
       return apiResponse.NOT_FOUND({
@@ -146,12 +180,18 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    let password = await bcrypt.hashSync(reqBody.password, 10);
+    if (password !== confirmPassword) {
+      return apiResponse.BAD_REQUEST({
+        res,
+        message: message.password_not_match,
+      });
+    }
+
+    let hashPassword = await bcrypt.hashSync(password, 10);
 
     await userService.updateUser(userExist.id, {
-      password: password,
+      password: hashPassword,
     });
-    await otpServices.deleteOtp(otpExists.id);
 
     return apiResponse.OK({
       res,
@@ -166,6 +206,176 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const getCommodityData = async (req, res) => {
+  try {
+    const apiKey = "N/KUHW09nFDyuRCfqAA8/fcD3JfP9OQn";
+    const encodedAuth = Buffer.from(`${apiKey}:`).toString("base64");
+
+    const options = {
+      method: "GET",
+      url: "https://marsapi.ams.usda.gov/services/v1.2/reports/2277/report%20details",
+      params: {
+        q: `report_date=${moment()
+          .subtract(8, "days")
+          .format("MM/DD/YYYY")}:${moment()
+          .subtract(1, "days")
+          .format("MM/DD/YYYY")}`,
+      },
+      headers: {
+        Authorization: `Basic ${encodedAuth}`,
+      },
+    };
+
+    const options2 = {
+      method: "GET",
+      url: "https://marsapi.ams.usda.gov/services/v1.2/reports/2278/report%20details",
+      params: {
+        q: `report_date=${moment()
+          .subtract(8, "days")
+          .format("MM/DD/YYYY")}:${moment()
+          .subtract(1, "days")
+          .format("MM/DD/YYYY")}`,
+      },
+      headers: {
+        Authorization: `Basic ${encodedAuth}`,
+      },
+    };
+
+    const { data } = await axios.request(options);
+    const { data: data2 } = await axios.request(options2);
+
+    // Assuming response looks like: { results: [...] }
+    const records = [...data.results] || [];
+
+    const records2 = [...data2.results] || [];
+
+    // Deduplicate based on report_date
+    const seen = new Set();
+    const uniqueCommodities = [];
+
+    for (const record of records) {
+      const key = `${record.report_date}_${record.commodity}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+
+        uniqueCommodities.push({
+          category_id: "4a9c4fe0-f665-4383-a608-d8061c55aaa2",
+          name: record.commodity,
+          overall_max_low_price: record.low_price || null,
+          overall_max_high_price: record.high_price || null,
+          date: moment(record.report_date, "MM/DD/YYYY").format("YYYY-MM-DD"),
+        });
+      }
+    }
+    for (const record of records2) {
+      const key = `${record.report_date}_${record.commodity}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+
+        uniqueCommodities.push({
+          category_id: "9de5ba30-a128-4dc7-bcd0-03d27adf39ef",
+          name: record.commodity,
+          package: record.package,
+          item_size: record.item_size,
+          overall_max_low_price: record.low_price || null,
+          overall_max_high_price: record.high_price || null,
+          date: moment(record.report_date, "MM/DD/YYYY").format("YYYY-MM-DD"),
+        });
+      }
+    }
+
+    // Bulk insert into the commodities table
+    await commodity.bulkCreate(uniqueCommodities, {
+      ignoreDuplicates: true, // Optional if you're using unique constraints
+    });
+
+    return apiResponse.OK({
+      res,
+      message: message.otp_verify_success,
+      data: uniqueCommodities,
+    });
+  } catch (err) {
+    console.log("err", err);
+    return res
+      .status(500)
+      .send({ message: "Error registering user", error: err.message });
+  }
+};
+
+const getPerKGprice = async (req, res) => {
+  console.log("req.params", req.body);
+  const { crops } = req.body;
+  try {
+    const validItems = crops.filter(
+      item => item.package && item.item_size && item.low_price
+    );
+    
+    // Construct individual item descriptions
+    const itemDescriptions = validItems.map((item, index) => {
+      const high = item.high_price || item.low_price;
+      return `Item ${index + 1}:
+    - Name: ${item.name}
+    - Variety: ${item.variety}
+    - Package: ${item.package}
+    - Item size: ${item.item_size}
+    - Low price: ${item.low_price}
+    - High price: ${high}`;
+    }).join('\n\n');
+    
+    // Build prompt
+    const prompt = `
+You are given a list of produce items with market prices in USD.
+
+For each item:
+- Use the low and high price (if high is missing, use low for both).
+- Estimate the total weight in kilograms from the package and item size.
+- Calculate per kg price in USD (rounded to 2 decimal places).
+
+Return only a JSON array with this format:
+[
+  {
+    "name": "Item Name",
+    "variety": "Variety",
+    "perKgLow": number,
+    "perKgHigh": number
+  }
+]
+Do not return any explanation or extra text.
+
+Items:
+${itemDescriptions}`;
+
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 90000 // 30 seconds
+      }
+    );
+
+    const content = response.data.choices[0].message.content;
+    const parsed = JSON.parse(content);
+
+    return res.status(200).send({
+      message: "Commodity data retrieved successfully",
+      data: parsed,
+    });
+  } catch (err) {
+    console.log("err", err);
+    return res
+      .status(500)
+      .send({ message: "Error retrieving commodity data", error: err.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -174,5 +384,8 @@ module.exports = {
   getAllUsers,
   forgotPassword,
   resetPassword,
-  getLoginUser
+  verifyOTP,
+  getLoginUser,
+  getCommodityData,
+  getPerKGprice,
 };

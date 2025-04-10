@@ -6,23 +6,34 @@ const { sendEmail } = require("../utils/email-sending");
 const moment = require("moment/moment");
 
 // Service function for creating a user
-const createUser = async (userData) => {
+const createUser = async (userData, res) => {
   try {
     const existingUser = await USER.findOne({
       where: { email: userData.email },
     });
 
     if (existingUser) {
-      return new Error("User with this email already exists");
+      return null;
     }
+
+    userData.roleId = 5;
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const newUser = await USER.create({
       ...userData,
       password: hashedPassword,
     });
-    return newUser;
+
+    const token = jwt.sign(
+      { id: newUser.id, role: newUser.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+    return { user: newUser, token };
   } catch (error) {
+    console.log('error', error)
     throw new Error("Error creating user");
   }
 };
@@ -33,8 +44,9 @@ const getUserByEmail = async (email) => {
     const user = await USER.findOne({
       attributes: [
         "id",
-        "userName",
+        "username",
         "password",
+        "profileImage",
         "email",
         "roleId",
         "createdAt",
@@ -61,6 +73,7 @@ const updateUser = async (id, updateData) => {
     await user.update(updateData);
     return user;
   } catch (error) {
+    console.log('error', error)
     throw new Error("Error updating user");
   }
 };
@@ -81,6 +94,7 @@ const deleteUser = async (id) => {
 
 // Service function for user login
 const loginUser = async (email, password) => {
+  console.log('email', email)
   try {
     const user = await getUserByEmail(email);
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -90,7 +104,7 @@ const loginUser = async (email, password) => {
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "24h",
       }
     );
     return { user, token };
@@ -107,11 +121,11 @@ const sendForgetPasswordEmail = async (email) => {
     }
 
     const generateOtp = () =>
-      ("0".repeat(4) + Math.floor(Math.random() * 10 ** 4)).slice(-4);
+      ("0".repeat(6) + Math.floor(Math.random() * 10 ** 6)).slice(-6);
 
     let otp = await generateOtp();
 
-    const expireTime = moment().add(10, "minute").toISOString();
+    const expireTime = moment().add(5, "minute").toISOString();
 
     await otpModel.create({
       otp,
@@ -134,6 +148,7 @@ const getUserById = async (id) => {
     }
     return user;
   } catch (error) {
+    console.log('error', error)
     throw new Error("Error fetching user by ID");
   }
 };

@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
             .status(401)
             .json({ success: false, message: messages.token_expired });
         } else {
-          return res.status(400).json({ success: false, message: err.message });
+          return res.status(401).json({ success: false, message: err.message });
         }
       }
 
@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
       const foundUser = await user.findOne({
         attributes: [
           "id",
-          "userName",
+          "username",
           "email",
           "roleId",
           "createdAt",

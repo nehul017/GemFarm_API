@@ -1,0 +1,76 @@
+const farmService = require("../services/farm.service");
+
+// Create Farm
+const createFarm = async (req, res) => {
+  try {
+    const result = await farmService.createFarm(req.body);
+    if (result instanceof Error) throw result;
+    return res
+      .status(201)
+      .json({ message: "Farm created successfully", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// Get all Farms
+const getAllFarms = async (req, res) => {
+  try {
+    const result = await farmService.getAllFarms();
+    if (result instanceof Error) throw result;
+    return res
+      .status(200)
+      .json({ message: "Farm  fetched successfully", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// Get Farm by ID
+const getFarmById = async (req, res) => {
+  try {
+    const result = await farmService.getFarmById(req.params.id);
+    if (!result) return res.status(404).json({ message: "Farm not found" });
+    return res
+      .status(200)
+      .json({ message: "Farm fetched successfully", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// Update Farm
+const updateFarm = async (req, res) => {
+  try {
+    const result = await farmService.updateFarm(req.params.id, req.body);
+    if (!result)
+      return res.status(404).json({ message: "Farm model not found" });
+    return res
+      .status(200)
+      .json({ message: "Farm updated successfully", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete Farm
+const deleteFarm = async (req, res) => {
+  try {
+    const result = await farmService.deleteFarm(req.params.id);
+    if (!result)
+      return res.status(404).json({ message: "Farm model not found" });
+    return res
+      .status(200)
+      .json({ message: "Farm deleted successfully", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  createFarm,
+  getAllFarms,
+  getFarmById,
+  updateFarm,
+  deleteFarm,
+};

@@ -5,8 +5,8 @@
   "something_went_wrong": "Something went to wrong, please try again later.",
   "otp_sent_email": "OTP sent on your registered email.",
   "account_blocked": "Your account has been blocked, please contact to admin.",
-  "otp_invalid": "Otp is invalid.",
-  "otp_expired": "Otp is expired.",
+  "otp_invalid": "Please enter valid OTP.",
+  "otp_expired": "OTP is Expired.",
   "invalid_password": "Invalid Password.",
   "password_reset": "Password is reset successfully.",
   "password_forgot": "Password is forgot successfully.",
@@ -18,9 +18,10 @@
   "email_not_register": "Email address doesn't register",
   "route_not_found": "Route not found",
   "login_successful": "Login successfully",
-  "otp_verify_success": "Otp verification successfully",
+  "otp_verify_success": "OTP verification successfully",
   "old_password_wrong": "old password is wrong",
   "unauthorized": "Unauthorized access.",
   "invalid_token": "Invalid token provided.",
-  "token_expired": "Your session has expired. Please log in again."
+  "token_expired": "Your session has expired. Please log in again.",
+  "password_not_match": "Password and confirm password not match."
 }
