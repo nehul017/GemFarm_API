@@ -37,7 +37,7 @@ const loginUser = async (req, res) => {
       req.body.email,
       req.body.password
     );
-    console.log('user', user)
+
     if (!user) {
       return res.status(400).send({ message: "Invalid email or password" });
     }
@@ -303,25 +303,26 @@ const getCommodityData = async (req, res) => {
 };
 
 const getPerKGprice = async (req, res) => {
-  console.log("req.params", req.body);
   const { crops } = req.body;
   try {
     const validItems = crops.filter(
-      item => item.package && item.item_size && item.low_price
+      (item) => item.package && item.item_size && item.low_price
     );
-    
+
     // Construct individual item descriptions
-    const itemDescriptions = validItems.map((item, index) => {
-      const high = item.high_price || item.low_price;
-      return `Item ${index + 1}:
+    const itemDescriptions = validItems
+      .map((item, index) => {
+        const high = item.high_price || item.low_price;
+        return `Item ${index + 1}:
     - Name: ${item.name}
     - Variety: ${item.variety}
     - Package: ${item.package}
     - Item size: ${item.item_size}
     - Low price: ${item.low_price}
     - High price: ${high}`;
-    }).join('\n\n');
-    
+      })
+      .join("\n\n");
+
     // Build prompt
     const prompt = `
 You are given a list of produce items with market prices in USD.
@@ -345,19 +346,20 @@ Do not return any explanation or extra text.
 Items:
 ${itemDescriptions}`;
 
+    console.log("process.env.OPENAI_API_KEY", process.env.OPENAI_API_KEY);
     const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
+      "https://api.openai.com/v1/chat/completions",
       {
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
+        model: "gpt-4.1 nano",
+        messages: [{ role: "user", content: prompt }],
         temperature: 0,
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        timeout: 90000 // 30 seconds
+        timeout: 90000, // 30 seconds
       }
     );
 
