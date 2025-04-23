@@ -21,7 +21,7 @@ router.post("/", auth, validate(createFarmSchema), createFarm);
 router.get("/", auth, getAllFarms);
 
 // Get a farm by ID
-router.get("/:id", auth, getFarmById);
+router.get("/by-id/:id", auth, getFarmById);
 
 // Update a farm
 router.put("/:id", auth, validate(updateFarmSchema), updateFarm);
