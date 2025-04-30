@@ -13,20 +13,22 @@ const {
 } = require("../validations/farm.validation");
 const auth = require("../middlewares/auth");
 const validate = require("../middlewares/validate");
+const authenticate = require("../middlewares/roleBaseAuthentication");
+
 
 // Create a farm
-router.post("/", auth, validate(createFarmSchema), createFarm);
+router.post("/", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), validate(createFarmSchema), createFarm);
 
 // Get all farms
-router.get("/", auth, getAllFarms);
+router.get("/", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), getAllFarms);
 
 // Get a farm by ID
-router.get("/by-id/:id", auth, getFarmById);
+router.get("/by-id/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), getFarmById);
 
 // Update a farm
-router.put("/:id", auth, validate(updateFarmSchema), updateFarm);
+router.put("/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), validate(updateFarmSchema), updateFarm);
 
 // Delete a farm
-router.delete("/:id", auth, deleteFarm);
+router.delete("/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), deleteFarm);
 
 module.exports = router;

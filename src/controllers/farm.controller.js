@@ -29,6 +29,7 @@ const getAllFarms = async (req, res) => {
 // Get Farm by ID
 const getFarmById = async (req, res) => {
   try {
+    console.log('req.params.id', req.params.id)
     const result = await farmService.getFarmById(req.params.id);
     if (!result) return res.status(404).json({ message: "Farm not found" });
     return res

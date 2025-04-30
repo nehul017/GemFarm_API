@@ -32,7 +32,15 @@ module.exports = (sequelize, DataTypes) => {
         harvest_date: {
             type: DataTypes.DATEONLY,
             allowNull: true
-        }
+        },
+        crop_category: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        harvest_system: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
     }, {
         timestamps: true,
         underscored: true,

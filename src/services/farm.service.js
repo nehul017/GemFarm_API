@@ -1,4 +1,5 @@
-const { farm: FarmModel } = require("../models");
+const { farm: FarmModel, container } = require("../models");
+
 
 // Create a new FarmModel
 const createFarm = async (data) => {
@@ -22,7 +23,15 @@ const getAllFarms = async () => {
 // Get FarmModel by ID
 const getFarmById = async (id) => {
   try {
-    const farm = await FarmModel.findByPk(id);
+    const farm = await FarmModel.findOne({
+      where: { id },
+      include: [
+        {
+          model: container, // example associated model
+          as: "containers", // make sure this alias matches the association
+        },
+      ],
+    });
     return farm || null;
   } catch (error) {
     return new Error(`Error fetching farm model by ID: ${error.message}`);
@@ -71,5 +80,5 @@ module.exports = {
   getFarmById,
   getFarmWhere,
   updateFarm,
-  deleteFarm
+  deleteFarm,
 };

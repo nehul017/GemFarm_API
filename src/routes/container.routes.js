@@ -9,20 +9,22 @@ const {
 const auth = require("../middlewares/auth");
 const validate = require("../middlewares/validate");
 const { containerController } = require("../controllers");
+const authenticate = require("../middlewares/roleBaseAuthentication");
+
 
 // Create a new container   
-router.post("/", auth, validate(createContainerSchema), containerController.createContainer);
+router.post("/", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), validate(createContainerSchema), containerController.createContainer);
 
 // Get all containers
-router.get("/", auth, containerController.getAllContainers);
+router.get("/", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), containerController.getAllContainers);
 
 // Get a container by ID
-router.get("/:id", auth, containerController.getContainerById);
+router.get("/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), containerController.getContainerById);
 
 // Update a container
-router.put("/:id", auth, validate(updateContainerSchema), containerController.updateContainer);
+router.put("/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), validate(updateContainerSchema), containerController.updateContainer);
 
 // Delete a container
-router.delete("/:id", auth, containerController.deleteContainer);
+router.delete("/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), containerController.deleteContainer);
 
 module.exports = router;

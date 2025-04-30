@@ -7,61 +7,120 @@ const bcrypt = require("bcryptjs");
 const axios = require("axios");
 const moment = require("moment/moment");
 const { commodity } = require("../models");
+const supabase = require("../config/supabaseClient");
 
 // Controller function for registering a user
-const registerUser = async (req, res) => {
-  try {
-    const createdData = await userService.createUser(req.body);
+// const registerUser = async (req, res) => {
+//   try {
+//     const createdData = await userService.createUser(req.body);
 
-    if (!createdData) {
-      return res.status(400).send({ message: "Email already exists" });
-    } else {
-      return res.status(201).send({
-        message: "User registered successfully",
-        user: createdData.user,
-        token: createdData.token,
-      });
-    }
-  } catch (err) {
-    console.log("err", err);
-    return res
-      .status(500)
-      .send({ message: "Error registering user", error: err.message });
-  }
-};
+//     if (!createdData) {
+//       return res.status(400).send({ message: "Email already exists" });
+//     } else {
+//       return res.status(201).send({
+//         message: "User registered successfully",
+//         user: createdData.user,
+//         token: createdData.token,
+//       });
+//     }
+//   } catch (err) {
+//     console.log("err", err);
+//     return res
+//       .status(500)
+//       .send({ message: "Error registering user", error: err.message });
+//   }
+// };
 
 // Controller function for logging in a user
+// const loginUser = async (req, res) => {
+//   try {
+//     const { user, token } = await userService.loginUser(
+//       req.body.email,
+//       req.body.password
+//     );
+
+//     if (!user) {
+//       return res.status(400).send({ message: "Invalid email or password" });
+//     }
+
+//     return res.status(200).send({
+//       message: "Login successful",
+//       user: user,
+//       token,
+//     });
+//   } catch (err) {
+//     console.log("err", err);
+//     return res.status(400).send({ message: err.message });
+//   }
+// };
+
 const loginUser = async (req, res) => {
   try {
-    const { user, token } = await userService.loginUser(
-      req.body.email,
-      req.body.password
-    );
+    const { email, password } = req.body;
 
-    if (!user) {
-      return res.status(400).send({ message: "Invalid email or password" });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
     }
 
-    return res.status(200).send({
+    const user = data.user;
+
+    // Fetch role and fullName from profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role, full_name", "profileImage")
+      .eq("id", user.id) // id in profiles = id in auth.users
+      .single(); // expect only one record
+
+    if (profileError) {
+      return res.status(400).json({ message: profileError.message });
+    }
+
+    return res.status(200).json({
       message: "Login successful",
-      user: user,
-      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: profile.role,
+        username: profile.full_name,
+        profileImage: profile.profileImage || "",
+      },
+      token: data.session.access_token,
     });
   } catch (err) {
-    console.log("err", err);
-    return res.status(400).send({ message: err.message });
+    console.error("Login error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
 // Controller function for updating a user
+// const updateUser = async (req, res) => {
+//   try {
+//     // Get uploaded image URL (if file exists)
+//     const profileImage = req.file ? req.file.location : undefined;
+
+//     delete req.body.email;
+//     if (profileImage) req.body.profileImage = profileImage;
+//     const user = await userService.updateUser(req.params.id, req.body);
+
+//     return res.status(200).send({ message: "User updated successfully", user });
+//   } catch (err) {
+//     return res.status(500).send({ message: err.message });
+//   }
+// };
+
 const updateUser = async (req, res) => {
   try {
     // Get uploaded image URL (if file exists)
     const profileImage = req.file ? req.file.location : undefined;
 
-    delete req.body.email;
     if (profileImage) req.body.profileImage = profileImage;
-    const user = await userService.updateUser(req.params.id, req.body);
+    const user = await userService.updateUserV2(req.params.id, req.body);
+
     return res.status(200).send({ message: "User updated successfully", user });
   } catch (err) {
     return res.status(500).send({ message: err.message });
@@ -171,15 +230,14 @@ const resetPassword = async (req, res) => {
   try {
     const { password, confirmPassword, email } = req.body;
 
-    const userExist = await userService.getUserByEmail(email);
+    const { data: users, error: fetchError } =
+      await supabase.auth.admin.listUsers();
 
-    if (!userExist) {
-      return apiResponse.NOT_FOUND({
-        res,
-        message: message.email_not_register,
-      });
-    }
+    if (fetchError) throw fetchError;
 
+    console.log('users', users)
+    const user = users.users.find((u) => u.email === email);
+    if (!user) throw new Error("User not found");
     if (password !== confirmPassword) {
       return apiResponse.BAD_REQUEST({
         res,
@@ -187,12 +245,9 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    let hashPassword = await bcrypt.hashSync(password, 10);
-
-    await userService.updateUser(userExist.id, {
-      password: hashPassword,
+    await supabase.auth.admin.updateUserById(user.id, {
+      password: password,
     });
-
     return apiResponse.OK({
       res,
       message: message.password_reset,
@@ -378,6 +433,46 @@ ${itemDescriptions}`;
   }
 };
 
+const registerUser = async (req, res) => {
+  try {
+    const { email, password, username, role } = req.body;
+
+    const { data: signupData, error: signupError } = await supabase.auth.signUp(
+      {
+        email,
+        password,
+      }
+    );
+
+    if (signupError) {
+      return res.status(400).json({ error: signupError.message });
+    }
+
+    const userId = signupData.user.id;
+
+    // Insert into profiles table
+    const { error: profileError } = await supabase.from("profiles").insert([
+      {
+        id: userId,
+        full_name: username,
+        role: role, // SuperAdmin, FarmOwner, Manager, Investor
+      },
+    ]);
+
+    if (profileError) {
+      return res.status(400).json({ error: profileError.message });
+    }
+
+    return res.status(201).json({
+      message: "User registered successfully",
+      user: signupData.user,
+    });
+  } catch (err) {
+    console.error("Register error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -390,4 +485,7 @@ module.exports = {
   getLoginUser,
   getCommodityData,
   getPerKGprice,
+  // loginUserV2,
+  // registerUserV2,
+  // updateUserV2,
 };

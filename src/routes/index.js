@@ -8,6 +8,8 @@ const farmRoutes = require("./farm.routes");
 const containerRoutes = require("./container.routes");
 const { upload } = require("../services/s3.upload");
 const auth = require("../middlewares/auth");
+const authenticate = require("../middlewares/roleBaseAuthentication");
+
 
 // Use routes with base paths
 router.use("/roles", roleRoutes);
@@ -16,7 +18,7 @@ router.use("/auth", userRoutes);
 router.use("/farms", farmRoutes);
 router.use("/containers", containerRoutes);
 
-router.post("/upload", auth, upload, (req, res) => {
+router.post("/upload", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), upload, (req, res) => {
   if (!req.file) {
     return res
       .status(400)

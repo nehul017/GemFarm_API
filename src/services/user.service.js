@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { sendOTP } = require("../templates/emailTemplate");
 const { sendEmail } = require("../utils/email-sending");
 const moment = require("moment/moment");
+const supabase = require("../config/supabaseClient");
 
 // Service function for creating a user
 const createUser = async (userData, res) => {
@@ -33,7 +34,7 @@ const createUser = async (userData, res) => {
     );
     return { user: newUser, token };
   } catch (error) {
-    console.log('error', error)
+    console.log("error", error);
     throw new Error("Error creating user");
   }
 };
@@ -73,7 +74,49 @@ const updateUser = async (id, updateData) => {
     await user.update(updateData);
     return user;
   } catch (error) {
-    console.log('error', error)
+    console.log("error", error);
+    throw new Error("Error updating user");
+  }
+};
+
+const updateUserV2 = async (userId, updateData) => {
+  console.log("updateData", updateData);
+  try {
+    const { data: oldProfile, error: fetchError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single(); // Only 1 record expected`
+
+    if (fetchError) {
+      throw new Error("User not found or error fetching user");
+    }
+
+    // Step 2: Update user
+    const { data: updatedUser, error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        full_name: updateData.username,
+        profileImage: updateData.profileImage || oldProfile.profileImage,
+      })
+      .eq("id", userId)
+      .select("*")
+      .single(); // Only 1 record expected
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    console.log("updatedUser", updatedUser);
+    return {
+      id: updatedUser.id,
+      username: updatedUser.full_name,
+      profileImage: updatedUser.profileImage,
+      phone: updatedUser.phone,
+      email: updateData.email,
+    };
+  } catch (error) {
+    console.log("error", error);
     throw new Error("Error updating user");
   }
 };
@@ -94,7 +137,6 @@ const deleteUser = async (id) => {
 
 // Service function for user login
 const loginUser = async (email, password) => {
-  console.log('email', email)
   try {
     const user = await getUserByEmail(email);
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -142,13 +184,31 @@ const sendForgetPasswordEmail = async (email) => {
 };
 const getUserById = async (id) => {
   try {
-    const user = await USER.findByPk(id);
-    if (!user) {
-      return new Error("User not found");
+    const { data, error } = await supabase.auth.admin.getUserById(id);
+
+    if (error || !data.user) {
+      throw new Error("User not found");
     }
-    return user;
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", id) // id in profiles = id in auth.users
+      .single(); // expect only one record
+
+    if (profileError) {
+      return res.status(400).json({ message: profileError.message });
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      role: profile.role,
+      username: profile.full_name,
+      profileImage: profile.profileImage || "",
+    };
   } catch (error) {
-    console.log('error', error)
+    console.error("Error fetching user by ID:", error);
     throw new Error("Error fetching user by ID");
   }
 };
@@ -161,4 +221,5 @@ module.exports = {
   loginUser,
   sendForgetPasswordEmail,
   getUserById,
+  updateUserV2,
 };
