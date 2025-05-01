@@ -166,6 +166,7 @@ const forgotPassword = async (req, res) => {
     const reqBody = req.body;
 
     const emailExist = await userService.getUserByEmail(reqBody.email);
+    
 
     if (!emailExist) {
       return apiResponse.NOT_FOUND({
@@ -235,7 +236,6 @@ const resetPassword = async (req, res) => {
 
     if (fetchError) throw fetchError;
 
-    console.log('users', users)
     const user = users.users.find((u) => u.email === email);
     if (!user) throw new Error("User not found");
     if (password !== confirmPassword) {

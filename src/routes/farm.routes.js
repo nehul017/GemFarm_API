@@ -17,7 +17,7 @@ const authenticate = require("../middlewares/roleBaseAuthentication");
 
 
 // Create a farm
-router.post("/", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), validate(createFarmSchema), createFarm);
+router.post("/", authenticate(['SuperAdmin', 'FarmOwner']), validate(createFarmSchema), createFarm);
 
 // Get all farms
 router.get("/", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), getAllFarms);

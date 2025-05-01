@@ -1,12 +1,26 @@
+const supabase = require("../config/supabaseClient");
 const { farm: FarmModel, container } = require("../models");
 
 
 // Create a new FarmModel
 const createFarm = async (data) => {
   try {
-    const newFarm = await FarmModel.create(data);
+    // const newFarm = await FarmModel.create(data);
+    // return newFarm;
+    const { data: newFarm, error } = await supabase
+      .from("farms") // your Supabase table name
+      .insert([data])
+      .select()
+      .single(); // return the inserted row
+
+    if (error) {
+      console.log('error', error)
+      throw new Error(error.message);
+    }
+
     return newFarm;
   } catch (error) {
+    console.log('error', error)
     return new Error(`Error creating farm model: ${error.message}`);
   }
 };

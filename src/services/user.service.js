@@ -42,22 +42,28 @@ const createUser = async (userData, res) => {
 // Service function for finding a user by email
 const getUserByEmail = async (email) => {
   try {
-    const user = await USER.findOne({
-      attributes: [
-        "id",
-        "username",
-        "password",
-        "profileImage",
-        "email",
-        "roleId",
-        "createdAt",
-        "updatedAt",
-        [sequelize.col("role.role"), "role"], // Alias the role's name directly in the result
-      ],
-      where: { email },
-      include: [{ model: role, as: "role", attributes: [] }], // Eager load role association
-      raw: true,
-    });
+    const { data, error } = await supabase.auth.admin.listUsers({ email });
+    if (error) {
+      console.error("Error fetching user by email:", error);
+      throw new Error("Error fetching user");
+    }
+    const user = data.users.find((u) => u.email === email);
+    // const user = await USER.findOne({
+    //   attributes: [
+    //     "id",
+    //     "username",
+    //     "password",
+    //     "profileImage",
+    //     "email",
+    //     "roleId",
+    //     "createdAt",
+    //     "updatedAt",
+    //     [sequelize.col("role.role"), "role"], // Alias the role's name directly in the result
+    //   ],
+    //   where: { email },
+    //   include: [{ model: role, as: "role", attributes: [] }], // Eager load role association
+    //   raw: true,
+    // });
     return user;
   } catch (error) {
     throw new Error("Error fetching user");

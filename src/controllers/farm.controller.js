@@ -3,7 +3,12 @@ const farmService = require("../services/farm.service");
 // Create Farm
 const createFarm = async (req, res) => {
   try {
-    const result = await farmService.createFarm(req.body);
+    const data = {
+      name: req.body.name,
+      location: req.body.location,
+      farm_image: req.body.farmImage,
+    }
+    const result = await farmService.createFarm(data);
     if (result instanceof Error) throw result;
     return res
       .status(201)

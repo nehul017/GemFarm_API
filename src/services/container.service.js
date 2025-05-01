@@ -1,11 +1,15 @@
+const supabase = require("../config/supabaseClient");
 const { container: Container, farm } = require("../models");
 
 // Create a new Container
-const createContainer = async (data) => {
+const createContainer = async (payload) => {
   try {
-    const newContainer = await Container.create(data);
-    return newContainer;
+    const { data, error } = await supabase.from("containers").insert([payload]);
+    console.log('error', error)
+
+    if (error) throw error;
   } catch (error) {
+    console.log('error', error)
     return new Error(`Error creating container: ${error.message}`);
   }
 };
