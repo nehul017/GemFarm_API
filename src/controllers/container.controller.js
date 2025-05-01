@@ -1,3 +1,4 @@
+const supabase = require("../config/supabaseClient");
 const containerService = require("../services/container.service");
 
 // Create Container
@@ -21,13 +22,17 @@ const getAllContainers = async (req, res) => {
     if (farm_id) {
       where.farm_id = farm_id;
     }
-    console.log('farm_id', farm_id)
 
-    const result = await containerService.getAllContainers(where);
-    if (result instanceof Error) throw result;
+    const { data, error } = await supabase
+      .from("containers")
+      .select("*")
+      .eq("farm_id", farm_id);
+      
+    if (error) throw error;
+
     return res
       .status(200)
-      .json({ message: "Containers fetched successfully", data: result });
+      .json({ message: "Containers fetched successfully", data: data });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

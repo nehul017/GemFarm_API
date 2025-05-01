@@ -8,6 +8,8 @@ const createContainer = async (payload) => {
     console.log('error', error)
 
     if (error) throw error;
+
+    return data;
   } catch (error) {
     console.log('error', error)
     return new Error(`Error creating container: ${error.message}`);

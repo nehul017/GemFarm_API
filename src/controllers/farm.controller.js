@@ -1,3 +1,4 @@
+const supabase = require("../config/supabaseClient");
 const farmService = require("../services/farm.service");
 
 // Create Farm
@@ -7,7 +8,7 @@ const createFarm = async (req, res) => {
       name: req.body.name,
       location: req.body.location,
       farm_image: req.body.farmImage,
-    }
+    };
     const result = await farmService.createFarm(data);
     if (result instanceof Error) throw result;
     return res
@@ -21,11 +22,13 @@ const createFarm = async (req, res) => {
 // Get all Farms
 const getAllFarms = async (req, res) => {
   try {
-    const result = await farmService.getAllFarms();
-    if (result instanceof Error) throw result;
+    const { data, error } = await supabase.from("farms").select("*");
+
+    if (error) throw error;
+
     return res
       .status(200)
-      .json({ message: "Farm  fetched successfully", data: result });
+      .json({ message: "Farm fetched successfully", data: data });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -34,12 +37,22 @@ const getAllFarms = async (req, res) => {
 // Get Farm by ID
 const getFarmById = async (req, res) => {
   try {
-    console.log('req.params.id', req.params.id)
-    const result = await farmService.getFarmById(req.params.id);
-    if (!result) return res.status(404).json({ message: "Farm not found" });
+
+    const { data, error } = await supabase
+    .from("farms")
+    .select(`
+      *,
+      containers(*)
+      `)
+      .eq("id", req.params.id)
+      .single();
+
+    if (error) throw error;
+
+    if (!data) return res.status(404).json({ message: "Farm not found" });
     return res
       .status(200)
-      .json({ message: "Farm fetched successfully", data: result });
+      .json({ message: "Farm fetched successfully", data: data });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
