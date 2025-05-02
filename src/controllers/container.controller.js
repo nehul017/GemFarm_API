@@ -7,7 +7,7 @@ const createContainer = async (req, res) => {
     const result = await containerService.createContainer(req.body);
     if (result instanceof Error) throw result;
     return res
-      .status(201)
+      .status(200)
       .json({ message: "Container created successfully", data: result });
   } catch (error) {
     return res.status(500).json({ error: error.message });

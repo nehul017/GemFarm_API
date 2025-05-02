@@ -10,7 +10,7 @@ const createRole = async (req, res) => {
     }
 
     const newRole = await roleService.createRole({ role });
-    return res.status(201).json(newRole);
+    return res.status(200).json(newRole);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

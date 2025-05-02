@@ -5,6 +5,7 @@ const createContainerSchema = Joi.object({
   container_name: Joi.string().optional().allow(null, ""),
   container_crop: Joi.string().optional().allow(null, ""),
   crop_category: Joi.string().optional().allow(null, ""),
+  crop_variety: Joi.string().optional().allow(null, ""),
   auto_grow_device_id: Joi.string().optional().allow(null, ""),
   blue_lab_device_id: Joi.string().optional().allow(null, ""),
   container_status: Joi.string().optional().allow(null, ""),

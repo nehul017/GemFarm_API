@@ -17,7 +17,7 @@ const supabase = require("../config/supabaseClient");
 //     if (!createdData) {
 //       return res.status(400).send({ message: "Email already exists" });
 //     } else {
-//       return res.status(201).send({
+//       return res.status(200).send({
 //         message: "User registered successfully",
 //         user: createdData.user,
 //         token: createdData.token,
@@ -463,7 +463,7 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ error: profileError.message });
     }
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "User registered successfully",
       user: signupData.user,
     });

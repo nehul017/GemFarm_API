@@ -12,7 +12,7 @@ const createFarm = async (req, res) => {
     const result = await farmService.createFarm(data);
     if (result instanceof Error) throw result;
     return res
-      .status(201)
+      .status(200)
       .json({ message: "Farm created successfully", data: result });
   } catch (error) {
     return res.status(500).json({ error: error.message });
