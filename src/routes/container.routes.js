@@ -27,4 +27,7 @@ router.put("/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor
 // Delete a container
 router.delete("/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), containerController.deleteContainer);
 
+//Get Container by Sensor Data
+router.get("/sensor/:id", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), containerController.getContainerBySensorData);
+
 module.exports = router;

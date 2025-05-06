@@ -83,10 +83,32 @@ const deleteContainer = async (req, res) => {
   }
 };
 
+// Get Container by Sensor Data
+const getContainerBySensorData = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from("sensor_data")
+      .select("*")
+      .eq("container_id", id)
+      .order("timestamp", { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    return res
+      .status(200)
+      .json({ message: "Sensor data fetched successfully", data: data });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createContainer,
   getAllContainers,
   getContainerById,
   updateContainer,
   deleteContainer,
+  getContainerBySensorData,
 };
