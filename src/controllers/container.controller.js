@@ -91,11 +91,11 @@ const getContainerBySensorData = async (req, res) => {
       .from("sensor_data")
       .select("*")
       .eq("container_id", id)
-      .order("timestamp", { ascending: false })
-      .limit(1);
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
+    console.log('data', data)
     return res
       .status(200)
       .json({ message: "Sensor data fetched successfully", data: data });

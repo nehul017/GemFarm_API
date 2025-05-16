@@ -9,7 +9,7 @@ const supabase = createClient(
 // Run a basic test query
 (async () => {
   try {
-    const { error } = await supabase.from("users").select("*").limit(1);
+    const { error } = await supabase.from("farms").select("*").limit(1);
     if (error) {
       console.error("❌ Supabase connection failed:", error.message);
     } else {

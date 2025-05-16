@@ -9,6 +9,7 @@ const deviceId = "ASLIC20903016";
 
 async function fetchAndStoreMetrics() {
   try {
+    console.log("Fetching metrics...");
     // Step 1: Authenticate
     const authRes = await axios.post("https://api.autogrow.com/v1/auth/token", {
       username,

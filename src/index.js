@@ -42,4 +42,5 @@ app.listen(process.env.PORT, () => {
     );
 });
 
-fetchAndStoreMetrics()
+// Call every 60,000 ms (1 minute)
+// setInterval(fetchAndStoreMetrics,  60 * 1000);

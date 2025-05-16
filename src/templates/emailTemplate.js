@@ -404,7 +404,51 @@ const employeeRegister = (firstName, lastName, to, password) => {
 </html>`;
 };
 
+const managerRegister = (firstName, to, password) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Welcome Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700" rel="stylesheet">
+</head>
+
+<body style="font-family: Montserrat, sans-serif; background: #f5f5f5; padding: 0; margin: 0;">
+  <table align="center" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; overflow: hidden;">
+    <tr>
+      <td style="padding: 30px; text-align: center;">
+        <img src="https://res.cloudinary.com/dsqbfz1es/image/upload/v1738819008/x6d8ukucar8uk4bgtstt.png" alt="GemFarm Logo" style="height: 100px; width: 180px;" />
+        <h2 style="margin-top: 30px; color: #263238;">Manager Account Created</h2>
+        <p style="font-size: 16px; color: #555;">Hello <strong style="color: #0A3732;">${firstName}</strong>,</p>
+        <p style="font-size: 16px; color: #555;">You’ve been added as a <strong>Manager</strong> on <strong>GemFarm</strong> by your FarmOwner.</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 20px 30px;">
+        <h3 style="color: #263238;">🧾 Your Login Details</h3>
+        <p style="margin: 10px 0; font-size: 15px;">
+          <strong>Email:</strong> ${to}
+        </p>
+        <p style="margin: 10px 0 20px; font-size: 15px;">
+          <strong>Password:</strong> ${password}
+        </p>
+        <p style="font-size: 14px; color: #999;">Please log in and change your password upon first login.</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 20px 30px; background: #ffff;">
+        <p style="font-size: 14px; margin: 0;">If you received this by mistake, you can ignore it.</p>
+        <p style="font-size: 14px; margin: 0;">Thanks, <br />GemFarm Team</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+};
+
 module.exports = {
   sendOTP,
   employeeRegister,
+  managerRegister,
 };

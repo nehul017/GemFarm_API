@@ -5,6 +5,7 @@ const router = express.Router();
 const roleRoutes = require("./role.routes");
 const userRoutes = require("./auth.routes");
 const farmRoutes = require("./farm.routes");
+const managerRoutes = require("./manager.routes");
 const containerRoutes = require("./container.routes");
 const { upload } = require("../services/s3.upload");
 const auth = require("../middlewares/auth");
@@ -17,6 +18,7 @@ router.use("/roles", roleRoutes);
 router.use("/auth", userRoutes);
 router.use("/farms", farmRoutes);
 router.use("/containers", containerRoutes);
+router.use("/manager", managerRoutes);
 
 router.post("/upload", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), upload, (req, res) => {
   if (!req.file) {

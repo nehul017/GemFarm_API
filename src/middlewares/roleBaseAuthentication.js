@@ -42,6 +42,8 @@ module.exports = (allowedRoles) => {
       }
 
       if (!allowedRoles.includes(profile.role)) {
+        console.log('rofile.role', profile.role)
+        console.log('allowedRoles', allowedRoles)
         return apiResponse.FORBIDDEN({
           res,
           message: "You don't have permission to perform this action",
