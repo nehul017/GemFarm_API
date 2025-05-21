@@ -3,9 +3,10 @@ const axios = require("axios");
 const { createClient } = require("@supabase/supabase-js");
 const supabase = require("../config/supabaseClient");
 
-const username = "HiralBorad";
-const password = "Hiral@123";
+const username = process.env.AUTO_GROW_USERNAME;
+const password = process.env.AUTO_GROW_PASSWORD;
 const deviceId = "ASLIC20903016";
+const AUTH_TOKEN = 'ed_nhcgsiktvlclhwgkxq0xr13ck8kak1fuulxju4qdv3xf62sdft0cgi3qb787xy25';
 
 async function fetchAndStoreMetrics() {
   try {
@@ -74,6 +75,45 @@ async function fetchAndStoreMetrics() {
   }
 }
 
+
+
+async function fetchIDoseTelemetryData() {
+  try {
+    // Step 1: Get all devices
+    const devicesRes = await axios.get('https://api.edenic.io/api/v1/device/b6dbf490-0974-11f0-a5ae-8dff4b34f2dc', {
+      headers: {
+        Authorization: AUTH_TOKEN
+      }
+    });
+
+    const devices = devicesRes.data;
+
+    // Step 2: Filter devices with label "IDose     "
+    const idoseDevices = devices.filter(device => device.label && device.label.trim() === 'IDose');
+
+    if (idoseDevices.length === 0) {
+      console.log('No IDose devices found.');
+      return;
+    }
+
+    // Step 3: Fetch telemetry for each IDose device
+    for (const device of idoseDevices) {
+      const telemetryRes = await axios.get(`https://api.edenic.io/api/v1/telemetry/${device.id}`, {
+        headers: {
+          Authorization: AUTH_TOKEN
+        }
+      });
+
+      console.log(`Telemetry for ${device.name} (${device.id}):`, telemetryRes.data);
+    }
+
+  } catch (error) {
+    console.error('Error occurred:', error.response ? error.response.data : error.message);
+  }
+}
+
+
 module.exports = {
   fetchAndStoreMetrics,
+  fetchIDoseTelemetryData
 };

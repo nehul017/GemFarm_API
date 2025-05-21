@@ -18,7 +18,7 @@ router.use("/roles", roleRoutes);
 router.use("/auth", userRoutes);
 router.use("/farms", farmRoutes);
 router.use("/containers", containerRoutes);
-router.use("/manager", managerRoutes);
+router.use("/managers", managerRoutes);
 
 router.post("/upload", authenticate(['SuperAdmin', 'FarmOwner', 'Manager', 'Investor']), upload, (req, res) => {
   if (!req.file) {

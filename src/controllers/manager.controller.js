@@ -20,7 +20,7 @@ exports.create = async (req, res) => {
 exports.getAll = async (req, res) => {
   try {
     const data = await managerService.getManagers();
-    res.status(200).json(data);
+    res.status(200).json({ message: "Managers retrieved", data });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

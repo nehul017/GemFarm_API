@@ -8,7 +8,7 @@ const { default: helmet } = require("helmet");
 const morgan = require("./config/morgan");
 const apiResponse = require("./middlewares/api.response");
 const { transport } = require("./utils/email-sending");
-const { fetchAndStoreMetrics } = require("./utils/cron.services");
+const { fetchAndStoreMetrics, fetchIDoseTelemetryData } = require("./utils/cron.services");
 require("./models/index");
 require("./config/supabaseClient");
 ``;
@@ -43,4 +43,6 @@ app.listen(process.env.PORT, () => {
 });
 
 // Call every 60,000 ms (1 minute)
+// setInterval(fetchIDoseTelemetryData,  65 * 1000);
+// // Call every 60,000 ms (1 minute)
 // setInterval(fetchAndStoreMetrics,  60 * 1000);

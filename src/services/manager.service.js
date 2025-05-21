@@ -52,13 +52,31 @@ const createManager = async ({ email, password, name, farmIds }) => {
 };
 
 const getManagers = async () => {
-  const { data, error } = await supabase
+  const { data: profiles, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email")
+    .select(
+      `
+    id,
+    full_name,
+    profileImage,
+    user_farms:user_farms (
+      id,
+      farmId
+    )
+  `
+    )
     .eq("role", "Manager");
-
   if (error) throw new Error(error.message);
-  return data;
+
+  const { data: users } = await supabase.auth.admin.listUsers(); // Requires service role or admin rights
+  console.log("users", users);
+
+  const enriched = profiles.map((p) => ({
+    ...p,
+    email: users.users.find((u) => u.id === p.id)?.email || "No email",
+  }));
+
+  return enriched;
 };
 
 const updateManager = async (id, updates) => {
@@ -72,10 +90,31 @@ const updateManager = async (id, updates) => {
 };
 
 const deleteManager = async (id) => {
-  await supabase.auth.admin.deleteUser(id);
-  const { data, error } = await supabase.from("profiles").delete().eq("id", id);
-  if (error) throw new Error(error.message);
-  return data;
+  // Step 1: Delete all user_farms for that user
+  const { error: farmError } = await supabase
+    .from("user_farms")
+    .delete()
+    .eq("userId", id);
+
+  if (farmError)
+    throw new Error(`Failed to delete user_farms: ${farmError.message}`);
+
+  // Step 2: Delete user profile
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .delete()
+    .eq("id", id);
+
+  if (profileError)
+    throw new Error(`Failed to delete profile: ${profileError.message}`);
+
+  // Step 3: Delete from Supabase Auth
+  const { error: authError } = await supabase.auth.admin.deleteUser(id);
+
+  if (authError)
+    throw new Error(`Failed to delete auth user: ${authError.message}`);
+
+  return { success: true };
 };
 
 module.exports = { createManager, getManagers, updateManager, deleteManager };
