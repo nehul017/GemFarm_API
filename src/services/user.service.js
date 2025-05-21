@@ -107,7 +107,7 @@ const updateUserV2 = async (userId, updateData) => {
       })
       .eq("id", userId)
       .select("*")
-      .single(); // Only 1 record expected
+      .maybeSingle(); // Prevents error if no row is returned
 
     if (updateError) {
       throw new Error(updateError.message);
